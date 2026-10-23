@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnatoMaster Cosmiatría & Estética - Sistema Muscular</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        outfit: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        beauty: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            300: '#f472b6',
+                            400: '#e879f9',
+                            500: '#ec4899',
+                            600: '#db2777',
+                            700: '#be185d',
+                            800: '#9d174d',
+                        },
+                        tealish: {
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #0b132b 0%, #1c2541 40%, #3a506b 100%);
+            min-height: 100vh;
+            color: #f8fafc;
+        }
+
+        /* SVG Dynamic Muscle Styles */
+        .muscle-part {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            stroke: #334155;
+            stroke-width: 1.2;
+        }
+
+        .muscle-part:hover {
+            fill: #f472b6 !important;
+            filter: drop-shadow(0 0 10px rgba(244, 114, 182, 0.9));
+            stroke: #ffffff;
+            stroke-width: 2;
+        }
+
+        .muscle-part.active {
+            fill: #db2777 !important;
+            stroke: #ffe4e6;
+            stroke-width: 2.5;
+            filter: drop-shadow(0 0 14px rgba(219, 39, 119, 0.9));
+        }
+
+        .muscle-part.correct-target {
+            animation: pulse-teal 1s infinite alternate;
+            fill: #10b981 !important;
+            stroke: #ecfdf5;
+        }
+
+        .muscle-part.wrong-target {
+            animation: shake 0.4s ease;
+            fill: #ef4444 !important;
+        }
+
+        @keyframes pulse-teal {
+            0% { filter: drop-shadow(0 0 4px #10b981); }
+            100% { filter: drop-shadow(0 0 14px #10b981); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-4px); }
+            40%, 80% { transform: translateX(4px); }
+        }
+
+        /* Flashcard 3D Flip */
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+        ::-webkit-scrollbar-thumb { background: #db2777; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb:hover { background: #f472b6; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen text-slate-100 selection:bg-pink-500 selection:text-white">
+
+    <!-- Header / Navbar -->
+    <header class="glass-panel sticky top-0 z-40 border-b border-slate-700/60 px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <!-- Brand -->
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-pink-600 via-rose-500 to-teal-400 flex items-center justify-center shadow-lg shadow-pink-500/30">
+                    <i class="fa-solid fa-sparkles text-xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="font-fredoka text-2xl font-bold bg-gradient-to-r from-pink-300 via-rose-200 to-teal-300 bg-clip-text text-transparent">
+                        AnatoCosmiatría <span class="text-xs text-teal-300 font-sans font-normal uppercase tracking-wider px-2 py-0.5 rounded-full bg-teal-500/20 border border-teal-500/30">Estética Pro</span>
+                    </h1>
+                    <p class="text-xs text-slate-300">Anatomía Muscular para Cosmetología, Cosmiatría y Estética Corporal</p>
+                </div>
+            </div>
+
+            <!-- Score & Share controls -->
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 bg-slate-900/80 px-3.5 py-1.5 rounded-2xl border border-slate-700">
+                    <div class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-trophy text-amber-400 text-sm"></i>
+                        <span id="global-score" class="font-bold font-fredoka text-amber-300 text-base">0</span>
+                    </div>
+                    <div class="w-px h-4 bg-slate-700"></div>
+                    <div class="flex items-center gap-1.5">
+                        <i class="fa-solid fa-fire text-pink-400 text-sm"></i>
+                        <span id="global-streak" class="font-bold font-fredoka text-pink-400 text-base">0</span>
+                    </div>
+                </div>
+
+                <!-- Share Button -->
+                <button onclick="openShareModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-400 hover:to-teal-500 font-bold text-xs text-white shadow-lg shadow-teal-500/20 transition flex items-center gap-2">
+                    <i class="fa-solid fa-share-nodes text-sm"></i>
+                    <span class="hidden sm:inline">Compartir con Clase / Docente</span>
+                </button>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex items-center bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800 text-sm font-medium w-full md:w-auto justify-center overflow-x-auto">
+                <button onclick="switchTab('explore')" id="tab-explore" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl transition-all duration-300 bg-pink-600 text-white font-semibold">
+                    <i class="fa-solid fa-microscope"></i>
+                    <span>Explorador</span>
+                </button>
+                <button onclick="switchTab('quiz')" id="tab-quiz" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl transition-all duration-300 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>Trivias (3 Módulos)</span>
+                </button>
+                <button onclick="switchTab('game')" id="tab-game" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl transition-all duration-300 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-bullseye"></i>
+                    <span>Desafío Ubicación</span>
+                </button>
+                <button onclick="switchTab('cards')" id="tab-cards" class="tab-btn flex items-center gap-2 px-3.5 py-2 rounded-xl transition-all duration-300 text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-clone"></i>
+                    <span>Flashcards</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main App Layout -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 lg:p-8 flex flex-col">
+
+        <!-- ================= SECTION 1: EXPLORER ================= -->
+        <section id="sec-explore" class="tab-content flex-1 flex flex-col gap-6">
+            <div class="flex flex-wrap items-center justify-between gap-4 glass-panel p-4 rounded-2xl">
+                <div>
+                    <h2 class="text-xl font-bold font-fredoka text-white flex items-center gap-2">
+                        <i class="fa-solid fa-hand-sparkles text-pink-400"></i>
+                        Explorador Muscular Cosmiátrico
+                    </h2>
+                    <p class="text-xs text-slate-300">Selecciona un músculo para ver su aplicación en masajes, lifting, aparatología y tratamiento estético.</p>
+                </div>
+
+                <!-- Region Selector -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="setDiagramRegion('face')" id="reg-btn-face" class="region-btn active px-4 py-2 rounded-xl border border-pink-500/50 bg-pink-500/20 text-pink-200 font-semibold text-xs transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-face-smile"></i> Cara y Cuello ⭐
+                    </button>
+                    <button onclick="setDiagramRegion('abdomen')" id="reg-btn-abdomen" class="region-btn px-4 py-2 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 font-semibold text-xs transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-child"></i> Abdomen & Torso ⭐
+                    </button>
+                    <button onclick="setDiagramRegion('body')" id="reg-btn-body" class="region-btn px-4 py-2 rounded-xl border border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700 font-semibold text-xs transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-person"></i> Cuerpo Entero
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 items-start">
+                <!-- SVG Canvas Container -->
+                <div class="lg:col-span-6 glass-panel p-6 rounded-3xl flex flex-col items-center justify-center min-h-[480px] relative overflow-hidden border border-slate-700/60 shadow-xl">
+                    <div class="absolute top-4 left-4 flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-900/90 border border-slate-700 text-pink-300">
+                        <i class="fa-solid fa-circle-dot text-teal-400 animate-pulse"></i>
+                        <span>Interactúa con el gráfico</span>
+                    </div>
+
+                    <div id="svg-container" class="w-full max-w-[460px] h-auto flex items-center justify-center my-auto transition-all duration-300">
+                        <!-- Dynamic SVG injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Technical Cosmiatric Info Card -->
+                <div class="lg:col-span-6 glass-panel p-6 rounded-3xl flex flex-col gap-4 border border-slate-700/60 shadow-xl min-h-[480px]">
+                    <div id="info-card-empty" class="my-auto flex flex-col items-center justify-center text-center p-8 space-y-4">
+                        <div class="w-16 h-16 rounded-full bg-pink-500/10 border border-pink-500/30 flex items-center justify-center text-pink-400 text-3xl">
+                            <i class="fa-solid fa-hand-holding-heart"></i>
+                        </div>
+                        <h3 class="text-lg font-bold font-fredoka text-slate-200">Selecciona un Músculo en la Ilustración</h3>
+                        <p class="text-xs text-slate-400 max-w-sm">Haz clic sobre cualquier área muscular para desplegar su relevancia estéticas, origen de arrugas, técnicas de masaje y aparatología indicada.</p>
+                    </div>
+
+                    <div id="info-card-content" class="hidden flex-col h-full justify-between space-y-4">
+                        <div>
+                            <!-- Header Info -->
+                            <div class="flex items-start justify-between gap-2 border-b border-slate-700/60 pb-3 mb-3">
+                                <div>
+                                    <span id="info-category" class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/30">
+                                        Músculo de la Cara y Cuello
+                                    </span>
+                                    <h3 id="info-title" class="text-2xl font-bold font-fredoka text-white mt-1">Platisma</h3>
+                                    <p id="info-latin" class="text-xs text-teal-300 italic font-mono">Musculus platysma</p>
+                                </div>
+                                <button onclick="speakMuscleName()" title="Escuchar Pronunciación" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-pink-600 text-pink-400 hover:text-white transition flex items-center justify-center border border-slate-700 shadow-md">
+                                    <i class="fa-solid fa-volume-high"></i>
+                                </button>
+                            </div>
+
+                            <!-- Detail Sections -->
+                            <div class="space-y-3 text-xs">
+                                <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
+                                    <h4 class="font-bold uppercase text-amber-400 flex items-center gap-1.5 mb-1">
+                                        <i class="fa-solid fa-location-dot"></i> Ubicación Anatómica
+                                    </h4>
+                                    <p id="info-location" class="text-slate-300 leading-relaxed">Cubre la zona anterior del cuello.</p>
+                                </div>
+
+                                <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
+                                    <h4 class="font-bold uppercase text-teal-300 flex items-center gap-1.5 mb-1">
+                                        <i class="fa-solid fa-spa"></i> Importancia Estética / Cosmiátrica
+                                    </h4>
+                                    <p id="info-aesthetic" class="text-slate-200 leading-relaxed">Responsable de las bandas verticales del cuello y el descolgamiento del óvalo facial.</p>
+                                </div>
+
+                                <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-800">
+                                    <h4 class="font-bold uppercase text-pink-400 flex items-center gap-1.5 mb-1">
+                                        <i class="fa-solid fa-wand-magic-sparkles"></i> Tratamiento Cosmiátrico Sugerido
+                                    </h4>
+                                    <p id="info-treatment" class="text-slate-200 leading-relaxed">Radiofrecuencia, Masaje Nefertiti/Kobido, Microcorrientes de reafirmación.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer indicator -->
+                        <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between text-xs text-slate-400">
+                            <span id="info-importance" class="text-teal-300 font-semibold">⭐ Clave Cosmiatría</span>
+                            <span class="text-slate-400">Presiona el parlante para pronunciar</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 2: EXTENDED TRIVIA MODULES ================= -->
+        <section id="sec-quiz" class="tab-content hidden flex-1 flex-col gap-6 max-w-3xl mx-auto w-full">
+            <!-- Module Switcher -->
+            <div class="glass-panel p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                    <h3 class="font-fredoka font-bold text-lg text-white">Módulos de Trivia Especializada</h3>
+                    <p class="text-xs text-slate-300">Selecciona la rama de evaluación que deseas practicar:</p>
+                </div>
+                <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+                    <button onclick="setQuizModule('facial')" id="quiz-mod-facial" class="quiz-mod-btn active px-3 py-1.5 rounded-xl border border-pink-500/50 bg-pink-500/20 text-white font-semibold text-xs">
+                        1. Estética Facial ⭐
+                    </button>
+                    <button onclick="setQuizModule('body')" id="quiz-mod-body" class="quiz-mod-btn px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-900 text-slate-400 hover:text-white text-xs">
+                        2. Corporal & Abdomen ⭐
+                    </button>
+                    <button onclick="setQuizModule('general')" id="quiz-mod-general" class="quiz-mod-btn px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-900 text-slate-400 hover:text-white text-xs">
+                        3. Anatomía Funcional
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quiz Card -->
+            <div class="glass-panel p-6 rounded-3xl border border-slate-700 space-y-6">
+                <div>
+                    <div class="flex justify-between items-center text-xs font-bold text-slate-400 mb-2">
+                        <span id="quiz-progress-text">Pregunta 1 de 5</span>
+                        <span id="quiz-score-badge" class="text-teal-300">Módulo Cosmiatría</span>
+                    </div>
+                    <div class="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                        <div id="quiz-progress-bar" class="h-full bg-gradient-to-r from-pink-500 via-rose-500 to-teal-400 transition-all duration-300 w-0"></div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <span id="quiz-category-tag" class="text-[10px] uppercase font-bold tracking-wider px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/30">
+                        Cosmiatría Facial
+                    </span>
+                    <h3 id="quiz-question-text" class="text-xl md:text-2xl font-bold font-fredoka text-white leading-snug">
+                        Pregunta aquí...
+                    </h3>
+                </div>
+
+                <!-- Options -->
+                <div id="quiz-options-container" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <!-- Options injected via JS -->
+                </div>
+
+                <!-- Explanation Box -->
+                <div id="quiz-explanation" class="hidden p-4 rounded-2xl bg-slate-900/90 border border-slate-700 text-xs space-y-1">
+                    <span id="quiz-feedback-title" class="font-bold block text-sm"></span>
+                    <p id="quiz-feedback-desc" class="text-slate-300 leading-relaxed"></p>
+                </div>
+
+                <div class="flex justify-end pt-2">
+                    <button id="quiz-next-btn" onclick="nextQuizQuestion()" class="hidden px-6 py-2.5 rounded-2xl bg-gradient-to-r from-pink-600 to-rose-600 text-white font-bold text-xs shadow-lg hover:brightness-110 transition flex items-center gap-2">
+                        <span>Siguiente Pregunta</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 3: LOCATION GAME ================= -->
+        <section id="sec-game" class="tab-content hidden flex-1 flex-col gap-6">
+            <div class="glass-panel p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-bold font-fredoka text-white flex items-center gap-2">
+                        <i class="fa-solid fa-bullseye text-pink-400"></i>
+                        Desafío Cosmiátrico de Ubicación
+                    </h2>
+                    <p class="text-xs text-slate-300">Encuentra el músculo objetivo en la ilustración anatómica antes de que venza el temporizador.</p>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="bg-slate-900/80 px-4 py-2 rounded-xl border border-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-clock text-amber-400"></i>
+                        <span id="game-timer" class="font-bold font-fredoka text-amber-400 text-lg">20s</span>
+                    </div>
+                    <button onclick="startLocationGame()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 font-bold text-xs shadow-lg transition flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> Reiniciar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Target Banner -->
+            <div class="bg-gradient-to-r from-pink-950/80 via-slate-900 to-teal-950/80 p-4 rounded-2xl border border-pink-500/30 text-center shadow-lg flex flex-col items-center justify-center min-h-[90px]">
+                <span class="text-[10px] uppercase font-bold tracking-wider text-pink-300">Haz Clic en el músculo:</span>
+                <h3 id="target-muscle-name" class="text-3xl font-bold font-fredoka text-amber-300 mt-1 drop-shadow-md">
+                    Cargando...
+                </h3>
+                <p id="target-muscle-hint" class="text-xs text-slate-300 italic mt-1">Pista cosmiátrica aparecerá aquí</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 items-center">
+                <!-- Interactive Board -->
+                <div class="lg:col-span-8 glass-panel p-6 rounded-3xl flex items-center justify-center min-h-[460px] relative border border-slate-700">
+                    <div id="game-svg-container" class="w-full max-w-[480px] h-auto flex items-center justify-center my-auto">
+                        <!-- Dynamic SVG -->
+                    </div>
+                </div>
+
+                <!-- Stats & Feedback -->
+                <div class="lg:col-span-4 flex flex-col gap-4">
+                    <div class="glass-panel p-6 rounded-3xl space-y-4 border border-slate-700">
+                        <h4 class="font-fredoka font-bold text-sm text-slate-200 border-b border-slate-700 pb-2 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-teal-400"></i> Puntuación de Sesión
+                        </h4>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-800 text-center">
+                                <span class="text-xs text-slate-400 block">Aciertos</span>
+                                <span id="game-correct" class="text-2xl font-bold font-fredoka text-emerald-400">0</span>
+                            </div>
+                            <div class="bg-slate-900/60 p-3 rounded-2xl border border-slate-800 text-center">
+                                <span class="text-xs text-slate-400 block">Fallos</span>
+                                <span id="game-wrong" class="text-2xl font-bold font-fredoka text-rose-400">0</span>
+                            </div>
+                        </div>
+
+                        <div id="game-feedback" class="min-h-[100px] p-4 rounded-2xl bg-slate-900/50 border border-slate-800 flex flex-col items-center justify-center text-center">
+                            <i class="fa-solid fa-gamepad text-slate-500 text-2xl mb-1"></i>
+                            <p class="text-xs text-slate-400">Haz clic en el músculo objetivo en la ilustración.</p>
+                        </div>
+                    </div>
+
+                    <!-- Region Selector -->
+                    <div class="glass-panel p-4 rounded-3xl border border-slate-700 space-y-2">
+                        <span class="text-xs font-bold text-slate-400 block uppercase">Filtrar Zona:</span>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="setGameRegion('face')" id="game-reg-face" class="game-reg-btn active p-2 text-xs rounded-xl border border-pink-500/50 bg-pink-500/20 text-white font-semibold">Cara / Cuello</button>
+                            <button onclick="setGameRegion('abdomen')" id="game-reg-abdomen" class="game-reg-btn p-2 text-xs rounded-xl border border-slate-800 bg-slate-900 text-slate-400 hover:text-white">Abdomen</button>
+                            <button onclick="setGameRegion('body')" id="game-reg-body" class="game-reg-btn p-2 text-xs rounded-xl border border-slate-800 bg-slate-900 text-slate-400 hover:text-white">Cuerpo</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 4: FLASHCARDS ================= -->
+        <section id="sec-cards" class="tab-content hidden flex-1 flex-col items-center justify-center gap-6 max-w-2xl mx-auto w-full">
+            <div class="text-center space-y-1">
+                <h2 class="text-xl font-bold font-fredoka text-white">Tarjetas de Memorización Cosmiátrica 3D</h2>
+                <p class="text-xs text-slate-300">Haz clic en la tarjeta para girarla y repasar técnicas y maniobras asociadas.</p>
+            </div>
+
+            <!-- Filters -->
+            <div class="flex gap-2">
+                <button onclick="filterCards('all')" id="card-filter-all" class="card-f-btn active px-3 py-1.5 rounded-xl border border-pink-500/50 bg-pink-500/20 text-white text-xs font-semibold">Todos</button>
+                <button onclick="filterCards('face')" id="card-filter-face" class="card-f-btn px-3 py-1.5 rounded-xl border border-slate-800 bg-slate-900 text-slate-400 text-xs font-semibold">Cara & Cuello ⭐</button>
+                <button onclick="filterCards('abdomen')" id="card-filter-abdomen" class="card-f-btn px-3 py-1.5 rounded-xl border border-slate-800 bg-slate-900 text-slate-400 text-xs font-semibold">Abdomen ⭐</button>
+            </div>
+
+            <!-- 3D Card -->
+            <div class="w-full h-80 perspective-1000 cursor-pointer" onclick="flipCard()">
+                <div id="flashcard-inner" class="relative w-full h-full transform-style-3d shadow-2xl rounded-3xl">
+                    <!-- FRONT -->
+                    <div class="absolute inset-0 w-full h-full glass-panel border border-slate-600/60 rounded-3xl p-6 flex flex-col justify-between items-center text-center backface-hidden bg-gradient-to-br from-slate-900 via-slate-900 to-pink-950/30">
+                        <div class="w-full flex justify-between items-center text-xs font-semibold text-pink-300">
+                            <span id="card-counter" class="bg-slate-800 px-3 py-1 rounded-full border border-slate-700">Tarjeta 1/15</span>
+                            <span id="card-category" class="uppercase tracking-wider">Cosmiatría Facial</span>
+                        </div>
+
+                        <div class="space-y-2">
+                            <span class="text-4xl text-pink-400"><i class="fa-solid fa-spa"></i></span>
+                            <h3 id="card-front-title" class="text-2xl font-bold font-fredoka text-white">Corrugador de la Ceja</h3>
+                            <p class="text-xs text-slate-400 font-mono italic">¿Qué arruga produce y cuál es su tratamiento?</p>
+                        </div>
+
+                        <div class="text-xs text-slate-500 flex items-center gap-1.5">
+                            <i class="fa-solid fa-rotate"></i> Haz clic para voltear
+                        </div>
+                    </div>
+
+                    <!-- BACK -->
+                    <div class="absolute inset-0 w-full h-full glass-panel border border-teal-500/40 rounded-3xl p-6 flex flex-col justify-between items-center text-center backface-hidden rotate-y-180 bg-gradient-to-br from-slate-900 via-teal-950/30 to-slate-900">
+                        <div class="w-full flex justify-end text-xs font-semibold text-teal-300 uppercase tracking-wider">
+                            Detalle Estético & Masaje
+                        </div>
+
+                        <div class="space-y-2 my-auto text-left w-full px-2">
+                            <h4 id="card-back-title" class="text-lg font-bold font-fredoka text-amber-300 text-center">Corrugador de la Ceja</h4>
+                            <p id="card-back-function" class="text-xs text-slate-200 leading-relaxed">
+                                Trae las cejas hacia adentro. Origina las arrugas verticales del entrecejo ("líneas de enojo" o del ceño).
+                            </p>
+                            <div class="p-2 rounded-xl bg-teal-500/10 border border-teal-500/20 text-xs text-teal-200 space-y-1">
+                                <div><strong>💆 Masaje / Tratamiento:</strong> <span id="card-back-treatment">Tecnicas de alisado transversal, toxina botulínica o microcorrientes descontracturantes.</span></div>
+                                <div><strong>💡 Tip:</strong> <span id="card-back-fact">Músculo clave en el tratamiento del tercio superior del rostro.</span></div>
+                            </div>
+                        </div>
+
+                        <div class="text-xs text-slate-500 flex items-center gap-1.5">
+                            <i class="fa-solid fa-rotate"></i> Volver al frente
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <button onclick="prevCard(event)" class="w-12 h-12 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center text-slate-200 hover:text-white transition">
+                    <i class="fa-solid fa-chevron-left text-lg"></i>
+                </button>
+                <button onclick="nextCard(event)" class="w-12 h-12 rounded-2xl bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center text-slate-200 hover:text-white transition">
+                    <i class="fa-solid fa-chevron-right text-lg"></i>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- SHARE MODAL -->
+    <div id="share-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="glass-panel p-6 rounded-3xl max-w-xl w-full border border-slate-600 space-y-5 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <div class="flex items-center gap-2 text-pink-400">
+                    <i class="fa-solid fa-share-nodes text-xl"></i>
+                    <h3 class="font-fredoka font-bold text-lg text-white">Compartir con Alumnos y Docente</h3>
+                </div>
+                <button onclick="closeShareModal()" class="text-slate-400 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4 text-xs text-slate-200">
+                <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-700 space-y-2">
+                    <h4 class="font-bold text-teal-300 flex items-center gap-1.5 text-sm">
+                        <i class="fa-solid fa-download"></i> OPCIÓN 1: Enviar el Archivo `.html` (Recomendado)
+                    </h4>
+                    <p class="text-slate-300 leading-relaxed">
+                        Puedes descargar o guardar este archivo completo con extensión <strong>.html</strong> y enviarlo por:
+                    </p>
+                    <ul class="list-disc list-inside text-slate-400 space-y-1 font-mono">
+                        <li>Grupo de WhatsApp / Telegram de la clase.</li>
+                        <li>Google Classroom o Teams como tarea interactiva.</li>
+                        <li>Correo electrónico o Pendrive USB.</li>
+                    </ul>
+                    <p class="text-[11px] text-amber-300 italic">¡Funciona offline sin instalar nada en cualquier celular o computadora!</p>
+                </div>
+
+                <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-700 space-y-2">
+                    <h4 class="font-bold text-pink-400 flex items-center gap-1.5 text-sm">
+                        <i class="fa-solid fa-chalkboard-user"></i> OPCIÓN 2: Para el Docente en el Aula
+                    </h4>
+                    <p class="text-slate-300 leading-relaxed">
+                        El profesor puede proyectarlo en la pantalla del salón para realizar actividades grupales:
+                    </p>
+                    <ul class="list-disc list-inside text-slate-400 space-y-1">
+                        <li><strong>Competencia por Equipos:</strong> Usar el "Desafío Cosmiátrico" de Ubicación.</li>
+                        <li><strong>Trivia Grupal:</strong> Evaluar los 3 módulos de trivia en conjunto al finalizar la clase.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-2">
+                <button onclick="closeShareModal()" class="px-5 py-2 rounded-xl bg-pink-600 hover:bg-pink-500 font-bold text-xs text-white">
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="glass-panel border-t border-slate-800 text-center py-3 text-xs text-slate-400 mt-auto">
+        <p>AnatoCosmiatría Pro - Plataforma Educativa para Cosmetología, Cosmiatría y Estética Corporal</p>
+    </footer>
+
+    <!-- JAVASCRIPT APP LOGIC -->
+    <script>
+        /* ================= EXTENDED MUSCLE DATABASE FOR COSMIATRY ================= */
+        const MUSCLE_DATA = {
+            // FACE & NECK (COSMIATRY PRIMARY FOCUS)
+            "frontal": {
+                name: "Frontal",
+                latin: "Musculus frontalis",
+                category: "face",
+                categoryName: "Cara y Cuello ⭐",
+                location: "Parte anterior de la cabeza, cubriendo la frente.",
+                aesthetic: "Origina las arrugas horizontales de la frente por hipertonía. Clave en el lifting del tercio superior.",
+                treatment: "Toxina botulínica, Masaje Kobido descontractrante, Microcorrientes y Radiofrecuencia para arrugas.",
+                importance: "⭐ Clave Cosmiatría"
+            },
+            "corrugador": {
+                name: "Corrugador de la Ceja",
+                latin: "Musculus corrugator supercilii",
+                category: "face",
+                categoryName: "Cara y Cuello ⭐",
+                location: "Ubicado en el extremo medial de las cejas.",
+                aesthetic: "Causa las arrugas verticales del entrecejo ('líneas de enfado' o '11'). Arruga facial profunda muy consultada.",
+                treatment: "Masajes digitales de alisado transversal, toxina botulínica, electroporación con péptidos relajantes.",
+                importance: "⭐ Clave Cosmiatría"
+            },
+            "procer": {
+                name: "Prócer (Piramidal)",
+                latin: "Musculus procerus",
+                category: "face",
+                categoryName: "Cara y Cuello ⭐",
+                location: "Sobre la parte superior de los huesos nasales entre las cejas.",
+                aesthetic: "Tracciona la piel entre las cejas hacia abajo generando pliegues horizontales sobre el puente nasal.",
+                treatment: "Digitopuntura facial, drenaje y estiramientos suaves con sueros reafirmantes.",
+                importance: "⭐ Clave Cosmiatría"
+            },
+            "orbicular_ojos": {
+                name: "Orbicular de los Ojos",
+                latin: "Musculus orbicularis oculi",
+                category: "face",
+                categoryName: "Cara y Cuello ⭐",
+                location: "Rodea ambas órbitas oculares.",
+                aesthetic: "Origina las 'patas de gallo' en la zona periocular lateral y favorece bolsas si se acumula linfa.",
+                treatment: "Drenaje Linfático Manual (DLM) periocular, Contorno de ojos con Microcorrientes, Masaje de Cucharas frías.",
+                importance: "⭐ Clave Cosmiatría"
+            },
+            "nasal": {
+                name: "Nasal (Transverso de la nariz)",
+                latin: "Musculus nasalis",
+                category: "face",
+                categoryName: "Cara y Cuello ⭐",
+                location: "Sobre el dorso y alas de la nariz.",
+                aesthetic: "Provoca las arrugas nasales superiores laterales ('bunny lines' o arrugas de conejo al sonreír).",
+                treatment: "Infiltraciones estéticas relajantes y suaves pases descontracturantes manuales.",
+                importance: "⭐ Clave Cosmiatría"
+            },
+            "cigomatico": {
+                name: "Cigomático Mayor y Menor",
+                latin: "Musculus zygomaticus major & minor",
+                category: "face",
+                categoryName: "Cara y Cuello ⭐",
+                location: "Desde el pómulo hasta la comisura labial y labio superior.",
+                aesthetic: "Son los 'músculos de la sonrisa'. Su hipotonía causa caída de mejillas y acentuación del surco nasogeniano.",
+                treatment: "Gimnasia facial de elevación, Masaje Kobido remodela pómulo, Microcorrientes tonificantes.",
+                importance: "⭐ Clave Cosmiatría"
+            },
+            "risorio": {
+                name: "Risorio de Santorini",
+                latin: "Musculus risorius",
+                category: "face",
+                categoryName: "Cara y Cuello ⭐",
+                location: "En la mejilla, lateral a la comisura de los labios.",
+                aesthetic: "Tracciona la comisura hacia afuera lateralmente. Produce las 'hojuelas' o hoyuelos de la
